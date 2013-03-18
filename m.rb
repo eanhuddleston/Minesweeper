@@ -3,8 +3,8 @@ class M
   attr_reader :bombs, :view, :model
 
   def initialize
-    @model = create_model
-    @view = []
+    @model = create_board("_")
+    @view = create_board("*")
     @bombs = []
   end
 
@@ -46,12 +46,55 @@ class M
     bomb_count
   end
 
-  def create_model
+  def process_all_around_blank(starting_coord)
+    queue = []
+    queue << starting_coord
+
+    until queue.empty?
+      coord = queue.shift
+      trans_array = [ [0,-1], [1,-1], [1,0],
+                    [1,1], [0,1], [-1,1],
+                    [-1,0], [-1,-1] ]
+
+      trans_array.each do |trans|
+        row, pos = (coord[0] + trans[0]), (coord[1] + trans[1])
+        unless row < 0 or row > 8 or pos < 0 or pos > 8
+          if @model[row][pos] != "_"
+            reveal_in_view([row, pos])
+          elsif @model[row][pos] == "_" && @view[row][pos] == "*"
+            queue << [row, pos]
+            reveal_in_view([row, pos])
+          end
+        end
+      end
+    end
+  end
+
+  def process_selection(users_choice)
+    #curr_coord = queue.shift
+    val = @model[users_choice[0]][users_choice[1]]
+    if val == 'B'
+      @bombs.each { |bomb| reveal_in_view(bomb) }
+    elsif val != '_'
+      reveal_in_view(users_choice)
+    else #it equaled "_"
+      reveal_in_view(users_choice)
+      process_all_around_blank(users_choice)
+
+    end
+
+  end
+
+  def reveal_in_view(coord)
+    @view[coord[0]][coord[1]] = @model[coord[0]][coord[1]]
+  end
+
+  def create_board(value)
     model = []
     (0..8).each do |i|
       model[i] = []
       (0..8).each do |j|
-        model[i][j] = "*"
+        model[i][j] = value
       end
     end
     model
@@ -63,3 +106,8 @@ class M
     end
   end
 end
+
+a = M.new
+a.insert_bombs
+a.insert_numbers
+a.print_board(a.model)
