@@ -1,3 +1,5 @@
+require 'yaml'
+
 class M
 
   attr_reader :bombs, :view, :model
@@ -75,7 +77,6 @@ class M
   end
 
   def play
-
     puts "Input Format: (r)eveal/(f)ormat 0-8 0-8"
     puts "Example: r 1 3"
 
@@ -94,12 +95,20 @@ class M
         end
       when "r"
         process_selection(coord)
+      when "s"
+        save_to_file
+        puts "Game saved to ./saved_game.yaml"
+        break
       end
       puts "You win!" if @game_status == "win"
       puts "You suck!" if @game_status == "lose"
       print_board(@view)
       insert_blank_lines(2)
     end
+  end
+
+  def save_to_file
+    File.open("saved_game.yaml", "w"){|file| YAML.dump(self,file)}
   end
 
   def insert_blank_lines(num)
@@ -157,5 +166,17 @@ class M
     board.each do |line|
       puts line.join(" ")
     end
+  end
+end
+require 'pry'
+if $PROGRAM_NAME == __FILE__
+  if ARGV[0]
+    a = YAML.load_file(ARGV[0])
+    #binding.pry
+    #a = File.open("saved_game.yaml", "r") {|file| YAML.load(file)}
+    a.play
+  else
+    a = M.new
+    a.play
   end
 end
