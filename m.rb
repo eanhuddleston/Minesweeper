@@ -6,6 +6,10 @@ class M
     @model = create_board("_")
     @view = create_board("*")
     @bombs = []
+    @flags = []
+    @game_status = "playing"
+    insert_bombs
+    insert_numbers
   end
 
   def insert_bombs
@@ -61,7 +65,7 @@ class M
         unless row < 0 or row > 8 or pos < 0 or pos > 8
           if @model[row][pos] != "_"
             reveal_in_view([row, pos])
-          elsif @model[row][pos] == "_" && @view[row][pos] == "*"
+          elsif @model[row][pos] == "_" && @view[row][pos] == "*" && @view[row][pos] != 'F'
             queue << [row, pos]
             reveal_in_view([row, pos])
           end
@@ -70,19 +74,63 @@ class M
     end
   end
 
+  def play
+
+    puts "Input Format: (r)eveal/(f)ormat 0-8 0-8"
+    puts "Example: r 1 3"
+
+    until @game_status == "lose" or @game_status == "win"
+      option, coord = collect_input
+
+      case option
+      when "f"
+        set_flag(coord)
+        if @flags.count == 10
+          if all_flags_correct?
+            @game_status = "win"
+          else
+            @game_status = "lose"
+          end
+        end
+      when "r"
+        process_selection(coord)
+      end
+      puts "You win!" if @game_status == "win"
+      puts "You suck!" if @game_status == "lose"
+      print_board(@view)
+      insert_blank_lines(2)
+    end
+  end
+
+  def insert_blank_lines(num)
+    num.times { puts "" }
+  end
+
+  def collect_input
+    input = gets.chomp.split(" ")
+    return input[0], [input[1].to_i, input[2].to_i]
+  end
+
+  def all_flags_correct?
+    if @flags.sort == @bombs.sort
+      true
+    else
+      false
+    end
+  end
+
   def process_selection(users_choice)
     #curr_coord = queue.shift
     val = @model[users_choice[0]][users_choice[1]]
     if val == 'B'
       @bombs.each { |bomb| reveal_in_view(bomb) }
+      @game_status = "lose"
     elsif val != '_'
       reveal_in_view(users_choice)
     else #it equaled "_"
       reveal_in_view(users_choice)
       process_all_around_blank(users_choice)
-
     end
-
   end
 
   def reveal_in_view(coord)
@@ -100,14 +148,14 @@ class M
     model
   end
 
+  def set_flag(coord)
+    @flags << coord
+    @view[coord[0]][coord[1]] = 'F'
+  end
+
   def print_board(board)
     board.each do |line|
       puts line.join(" ")
     end
   end
 end
-
-a = M.new
-a.insert_bombs
-a.insert_numbers
-a.print_board(a.model)
