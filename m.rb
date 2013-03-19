@@ -168,12 +168,11 @@ class M
     end
   end
 end
-require 'pry'
+
 if $PROGRAM_NAME == __FILE__
   if ARGV[0]
-    a = YAML.load_file(ARGV[0])
-    #binding.pry
-    #a = File.open("saved_game.yaml", "r") {|file| YAML.load(file)}
+    file = ARGV.pop
+    a = YAML.load_file(file)
     a.play
   else
     a = M.new
