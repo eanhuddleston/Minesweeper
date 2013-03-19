@@ -4,20 +4,32 @@ class M
 
   attr_reader :bombs, :view, :model
 
-  def initialize
+  def initialize(board_size = 9)
+    @board_size = board_size - 1
     @model = create_board("_")
     @view = create_board("*")
     @bombs = []
+    @bomb_count = get_bomb_count
     @flags = []
     @game_status = "playing"
     insert_bombs
     insert_numbers
   end
 
+  def get_bomb_count
+    if @board_size == 8
+      bomb_count = 10
+    else
+      bomb_count = 40
+    end
+
+    bomb_count
+  end
+
   def insert_bombs
-    until @bombs.count == 10
-      i = Random.new.rand(0..8)
-      j = Random.new.rand(0..8)
+    until @bombs.count == @bomb_count
+      i = Random.new.rand(0..@board_size)
+      j = Random.new.rand(0..@board_size)
       @bombs << [i,j] unless @bombs.include?([i,j])
     end
     @bombs.each do |bomb|
@@ -42,7 +54,7 @@ class M
                   [-1,0], [-1,-1] ]
     trans_array.each do |trans|
       row, pos = (curr_pos[0] + trans[0]), (curr_pos[1] + trans[1])
-      unless row < 0 or row > 8 or pos < 0 or pos > 8
+      unless row < 0 or row > (@board_size) or pos < 0 or pos > (@board_size)
         if @model[row][pos] == "B"
           bomb_count += 1
         end
@@ -64,7 +76,7 @@ class M
 
       trans_array.each do |trans|
         row, pos = (coord[0] + trans[0]), (coord[1] + trans[1])
-        unless row < 0 or row > 8 or pos < 0 or pos > 8
+        unless row < 0 or row > @board_size or pos < 0 or pos > @board_size
           if @model[row][pos] != "_"
             reveal_in_view([row, pos])
           elsif @model[row][pos] == "_" && @view[row][pos] == "*" && @view[row][pos] != 'F'
@@ -86,7 +98,7 @@ class M
       case option
       when "f"
         set_flag(coord)
-        if @flags.count == 10
+        if @flags.count == @bomb_count
           if all_flags_correct?
             @game_status = "win"
           else
@@ -148,9 +160,9 @@ class M
 
   def create_board(value)
     model = []
-    (0..8).each do |i|
+    (0..@board_size).each do |i|
       model[i] = []
-      (0..8).each do |j|
+      (0..@board_size).each do |j|
         model[i][j] = value
       end
     end
