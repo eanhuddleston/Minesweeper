@@ -5,10 +5,12 @@ class Minesweeper
   attr_reader :bombs, :view, :model
 
   def initialize(board_size = 9)
+    # KL: A lot of instance variables going on here. I'm guessing not all of these are necessary
     @board_size = board_size - 1
     @model = create_board("_")
     @view = create_board("*")
     @bombs = []
+    # KL: bomb_count probably only needs to be a byproduct of @bombs.count
     @bomb_count = get_bomb_count
     @flags = []
     @game_status = "playing"
@@ -29,6 +31,7 @@ class Minesweeper
   end
 
   def insert_bombs
+    # KL: you could call get_bomb_count here to get the necessary count
     until @bombs.count == @bomb_count
       i = Random.new.rand(0..@board_size)
       j = Random.new.rand(0..@board_size)
@@ -51,6 +54,7 @@ class Minesweeper
 
   def count_adjacent_bombs(curr_pos)
     bomb_count = 0
+    # KL: the trans_array is a goood candidate for a constant
     trans_array = [ [0,-1], [1,-1], [1,0],
                   [1,1], [0,1], [-1,1],
                   [-1,0], [-1,-1] ]
@@ -65,7 +69,7 @@ class Minesweeper
 
     bomb_count
   end
-
+  # KL: Be more semantic with your method naming
   def process_all_around_blank(starting_coord)
     queue = []
     queue << starting_coord
@@ -97,7 +101,8 @@ class Minesweeper
     until @game_status == "lose" or @game_status == "win"
 
       option, coord = collect_input
-
+    # KL: got a lot going on in your play loop
+    # KL: try breaking it up into chunks like input check, win check, etc
       case option
       when "f"
         set_flag(coord)
@@ -195,6 +200,7 @@ end
 
 if $PROGRAM_NAME == __FILE__
   if ARGV[0]
+    # KL: safer to use ARGV.shift to make sure you get the 0'th argument -- might be others trailing behind
     file = ARGV.pop
     a = YAML.load_file(file)
     a.play
