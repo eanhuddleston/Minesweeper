@@ -1,5 +1,5 @@
 require 'yaml'
-
+#test
 class Minesweeper
 
   attr_reader :bombs, :view, :model
