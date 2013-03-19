@@ -1,7 +1,11 @@
+## REV: overall very concise with digestible chunks
+
+
 require 'yaml'
 #test
 class Minesweeper
 
+  ## REV: nice, clean setup
   attr_reader :bombs, :view, :model
 
   def initialize(board_size = 9)
@@ -30,7 +34,7 @@ class Minesweeper
 
   def insert_bombs
     until @bombs.count == @bomb_count
-      i = Random.new.rand(0..@board_size)
+      i = Random.new.rand(0..@board_size)     # REV: don't think we need the Random.new. here
       j = Random.new.rand(0..@board_size)
       @bombs << [i,j] unless @bombs.include?([i,j])
     end
