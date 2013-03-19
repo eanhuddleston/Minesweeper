@@ -6,7 +6,11 @@ class Minesweeper
 
   def initialize(board_size = 9)
     @board_size = board_size - 1
-    @model = create_board("_")
+      @model = create_board("_") #REV: interesting that you created two full board
+      #models, one for representing hidden data and one for printing.
+      #we only had one set of stored info, but then had a print function that
+      #knew how to manipulate that data to generate the correct UI. Your method
+      #seems a little closer to an OOP style.
     @view = create_board("*")
     @bombs = []
     @bomb_count = get_bomb_count
@@ -51,12 +55,13 @@ class Minesweeper
 
   def count_adjacent_bombs(curr_pos)
     bomb_count = 0
-    trans_array = [ [0,-1], [1,-1], [1,0],
+      trans_array = [ [0,-1], [1,-1], [1,0],  #REV: good idea to use trans_array
                   [1,1], [0,1], [-1,1],
                   [-1,0], [-1,-1] ]
     trans_array.each do |trans|
       row, pos = (curr_pos[0] + trans[0]), (curr_pos[1] + trans[1])
-      unless row < 0 or row > (@board_size) or pos < 0 or pos > (@board_size)
+        unless row < 0 or row > (@board_size) or pos < 0 or pos > (@board_size)
+            #REV: could refactor this as an in_bounds? function 
         if @model[row][pos] == "B"
           bomb_count += 1
         end
@@ -66,7 +71,7 @@ class Minesweeper
     bomb_count
   end
 
-  def process_all_around_blank(starting_coord)
+    def process_all_around_blank(starting_coord) #REV: better function name?
     queue = []
     queue << starting_coord
 
@@ -79,6 +84,7 @@ class Minesweeper
       trans_array.each do |trans|
         row, pos = (coord[0] + trans[0]), (coord[1] + trans[1])
         unless row < 0 or row > @board_size or pos < 0 or pos > @board_size
+            #REV: again, could refactor this
           if @model[row][pos] != "_"
             reveal_in_view([row, pos])
           elsif @model[row][pos] == "_" && @view[row][pos] == "*" && @view[row][pos] != 'F'
@@ -101,7 +107,9 @@ class Minesweeper
       case option
       when "f"
         set_flag(coord)
-        if @flags.count == @bomb_count
+          if @flags.count == @bomb_count #REV: these cases are organized much better
+              #than our code. I like that you check for a flag one in the same section
+              #of code that checks if "f" was the input.
           if all_flags_correct?
             @game_status = "win"
             @end_time = Time.now
@@ -112,7 +120,7 @@ class Minesweeper
       when "r"
         process_selection(coord)
       when "s"
-        save_to_file
+          save_to_file #REV: lot's of good refactoring in this method
         puts "Game saved to ./saved_game.yaml"
         break
       end
@@ -133,6 +141,7 @@ class Minesweeper
 
   def save_to_file
     File.open("saved_game.yaml", "w"){|file| YAML.dump(self,file)}
+      #REV: interesting, we opened a file and called puts self.to_yaml
   end
 
   def insert_blank_lines(num)
@@ -145,7 +154,7 @@ class Minesweeper
   end
 
   def all_flags_correct?
-    if @flags.sort == @bombs.sort
+      if @flags.sort == @bombs.sort #REV: smart idea to use .sort
       true
     else
       false
