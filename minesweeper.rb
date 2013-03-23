@@ -1,5 +1,5 @@
 require 'yaml'
-#test
+
 class Minesweeper
 
   attr_reader :bombs, :view, :model
@@ -91,7 +91,8 @@ class Minesweeper
   end
 
   def play
-    puts "Input Format: (r)eveal/(f)ormat 0-8 0-8"
+    print_board(@view)
+    puts "Input Format: (r)eveal/(f)lag 0-8 0-8"
     puts "Example: r 1 3"
     @start_time = Time.now
     until @game_status == "lose" or @game_status == "win"
@@ -127,7 +128,7 @@ class Minesweeper
 
       puts "You suck!" if @game_status == "lose"
       print_board(@view)
-      insert_blank_lines(2)
+      insert_blank_lines(1)
     end
   end
 
@@ -171,14 +172,7 @@ class Minesweeper
   end
 
   def create_board(value)
-    model = []
-    (0..@board_size).each do |i|
-      model[i] = []
-      (0..@board_size).each do |j|
-        model[i][j] = value
-      end
-    end
-    model
+    Array.new(@board_size + 1) { Array.new(@board_size + 1) {value} }
   end
 
   def set_flag(coord)
@@ -187,8 +181,12 @@ class Minesweeper
   end
 
   def print_board(board)
-    board.each do |line|
-      puts line.join(" ")
+    line = "  "
+    (@board_size + 1).times { |i| line << "#{i} " }
+    puts line
+
+    board.each_with_index do |line, i|
+      puts "#{i} #{line.join(" ")}"
     end
   end
 end
